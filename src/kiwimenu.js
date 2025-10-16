@@ -30,19 +30,22 @@ const RECENT_ITEMS_FILE = GLib.build_filenamev([
   GLib.get_user_data_dir(),
   'recently-used.xbel',
 ]);
+// Delay before closing the recent popup so pointer can cross the bridge.
 const HOVER_CLOSE_DELAY_MS = 200;
-const EXTERNAL_MENU_GAP_PX = 16;
+// Delay before opening the recent popup to avoid flashing during fast navigation.
+const RECENT_OPEN_DELAY_MS = 500;
+const RECENT_MENU_GAP_PX = 16;
 
 export const KiwiMenu = GObject.registerClass(
   class KiwiMenu extends PanelMenu.Button {
     _init(settings, extensionPath) {
       super._init(0.0, 'KiwiMenu');
 
-      this._settings = settings;
-      this._extensionPath = extensionPath;
-      this._settingsSignalIds = [];
-      this._menuOpenSignalId = 0;
-      this._externalMenuManager = new PopupMenu.PopupMenuManager(this);
+  this._settings = settings;
+  this._extensionPath = extensionPath;
+  this._settingsSignalIds = [];
+  this._menuOpenSignalId = 0;
+  this._recentMenuManager = new PopupMenu.PopupMenuManager(this);
 
       this._icons = Object.freeze(
         loadJsonFile(this._extensionPath, ['src', 'icons.json']).map((icon) =>
@@ -162,8 +165,8 @@ export const KiwiMenu = GObject.registerClass(
           case 'menu':
             this._makeMenu(item.title, item.cmds);
             break;
-          case 'expandable-menu':
-            this._makeExpandableMenu(item.title);
+          case 'recent-items':
+            this._makeRecentItemsMenu(item.title);
             break;
           case 'separator':
             this._makeSeparator();
@@ -202,7 +205,7 @@ export const KiwiMenu = GObject.registerClass(
       this.menu.addMenuItem(menuItem);
     }
 
-    _makeExpandableMenu(title) {
+    _makeRecentItemsMenu(title) {
       const submenuItem = new PopupMenu.PopupBaseMenuItem({
         reactive: true,
         can_focus: true,
@@ -223,15 +226,17 @@ export const KiwiMenu = GObject.registerClass(
       });
       submenuItem.add_child(arrowIcon);
 
-      let externalMenu = null;
-      let externalMenuSignalIds = [];
-      let externalMenuMenuSignalIds = [];
+  let recentMenu = null;
+  let recentMenuHoverActor = null;
+  let recentMenuSignalIds = [];
+  let recentMenuMenuSignalIds = [];
       let hoverCloseTimeoutId = 0;
+  let openDelayTimeoutId = 0;
       let mainMenuCloseId = 0;
       let submenuDestroyId = 0;
       let chromeAdded = false;
       let managerRegistered = false;
-      let externalMenuClosing = false;
+      let recentMenuClosing = false;
       let mainMenuItemSignalIds = [];
 
       const populateMenu = (menu) => {
@@ -255,7 +260,7 @@ export const KiwiMenu = GObject.registerClass(
               logError(error, `Failed to open recent item: ${uri}`);
             }
             this.menu.close(true);
-            closeAndDestroyMenu();
+            closeAndDestroyRecentMenu();
           });
           menu.addMenuItem(recentMenuItem);
         });
@@ -268,57 +273,110 @@ export const KiwiMenu = GObject.registerClass(
         }
       };
 
+      const cancelOpenDelay = () => {
+        if (openDelayTimeoutId) {
+          GLib.source_remove(openDelayTimeoutId);
+          openDelayTimeoutId = 0;
+        }
+      };
+
+      const clearSubmenuHover = () => {
+        if (typeof submenuItem.setActive === 'function') {
+          submenuItem.setActive(false);
+        }
+
+        if (typeof submenuItem.remove_style_pseudo_class === 'function') {
+          submenuItem.remove_style_pseudo_class('hover');
+          submenuItem.remove_style_pseudo_class('active');
+          submenuItem.remove_style_pseudo_class('checked');
+        }
+
+        if (submenuItem && submenuItem.actor) {
+          const actor = submenuItem.actor;
+          if (typeof actor.set_hover === 'function') {
+            actor.set_hover(false);
+          }
+          if (typeof actor.remove_style_pseudo_class === 'function') {
+            actor.remove_style_pseudo_class('hover');
+            actor.remove_style_pseudo_class('active');
+            actor.remove_style_pseudo_class('checked');
+          }
+        }
+      };
+
       const scheduleClose = () => {
         cancelClose();
         hoverCloseTimeoutId = GLib.timeout_add(
           GLib.PRIORITY_DEFAULT,
           HOVER_CLOSE_DELAY_MS,
           () => {
-            const pointerRegion = getPointerRegion();
+            const pointerState = getPointerState();
 
-            if (pointerRegion === PointerRegion.INSIDE) {
+            if (pointerState === PointerState.INSIDE) {
               hoverCloseTimeoutId = 0;
               return GLib.SOURCE_REMOVE;
             }
 
-            if (pointerRegion === PointerRegion.BRIDGE) {
+            if (pointerState === PointerState.BRIDGE) {
               return GLib.SOURCE_CONTINUE;
             }
 
             hoverCloseTimeoutId = 0;
-            closeAndDestroyMenu();
+            closeAndDestroyRecentMenu();
+            clearSubmenuHover();
             return GLib.SOURCE_REMOVE;
           }
         );
         GLib.Source.set_name_by_id(hoverCloseTimeoutId, 'KiwiMenuHoverCloseDelay');
       };
 
-      const disconnectExternalMenuSignals = () => {
-        if (!externalMenu) {
+      const scheduleOpen = () => {
+        cancelOpenDelay();
+
+        if (recentMenu && recentMenu.isOpen) {
           return;
         }
 
-        externalMenuSignalIds.forEach((id) => {
-          if (id) {
+        openDelayTimeoutId = GLib.timeout_add(
+          GLib.PRIORITY_DEFAULT,
+          RECENT_OPEN_DELAY_MS,
+          () => {
+            openDelayTimeoutId = 0;
+            const menu = ensureRecentMenu();
+            menu.open(true);
+            return GLib.SOURCE_REMOVE;
+          }
+        );
+        GLib.Source.set_name_by_id(openDelayTimeoutId, 'KiwiMenuRecentOpenDelay');
+      };
+
+      const disconnectRecentMenuSignals = () => {
+        recentMenuSignalIds.forEach(({ target, id }) => {
+          if (target && id) {
             try {
-              externalMenu.actor.disconnect(id);
+              target.disconnect(id);
             } catch (_error) {
               // Ignore, signal already disconnected during teardown
             }
           }
         });
-        externalMenuSignalIds = [];
+        recentMenuSignalIds = [];
 
-        externalMenuMenuSignalIds.forEach((id) => {
+        if (!recentMenu) {
+          recentMenuMenuSignalIds = [];
+          return;
+        }
+
+        recentMenuMenuSignalIds.forEach((id) => {
           if (id) {
             try {
-              externalMenu.disconnect(id);
+              recentMenu.disconnect(id);
             } catch (_error) {
               // Ignore if already disconnected during teardown
             }
           }
         });
-        externalMenuMenuSignalIds = [];
+        recentMenuMenuSignalIds = [];
       };
 
       const disconnectMainMenuItemSignals = () => {
@@ -354,12 +412,14 @@ export const KiwiMenu = GObject.registerClass(
 
           actor.track_hover = true;
           const signalId = actor.connect('enter-event', () => {
-            if (!externalMenu) {
+            if (!recentMenu) {
               return Clutter.EVENT_PROPAGATE;
             }
 
             cancelClose();
-            closeAndDestroyMenu();
+            cancelOpenDelay();
+            closeAndDestroyRecentMenu();
+            clearSubmenuHover();
             return Clutter.EVENT_PROPAGATE;
           });
 
@@ -367,77 +427,86 @@ export const KiwiMenu = GObject.registerClass(
         });
       };
 
-      const ensureExternalMenu = () => {
-        if (externalMenu) {
-          populateMenu(externalMenu);
+      const ensureRecentMenu = () => {
+        if (recentMenu) {
+          populateMenu(recentMenu);
           connectMainMenuItemSignals();
-          return externalMenu;
+          return recentMenu;
         }
 
-        externalMenu = new PopupMenu.PopupMenu(submenuItem.actor, 0.0, St.Side.RIGHT);
-        externalMenu.setArrowOrigin(0.0);
-        externalMenu.actor.add_style_class_name('Kiwi-external-menu');
-        if (externalMenu.actor.set_margin_left) {
-          externalMenu.actor.set_margin_left(EXTERNAL_MENU_GAP_PX);
+        recentMenu = new PopupMenu.PopupMenu(submenuItem.actor, 0.0, St.Side.RIGHT);
+        recentMenu.setArrowOrigin(0.0);
+        recentMenu.actor.add_style_class_name('kiwi-recent-menu');
+        if (recentMenu.actor.set_margin_left) {
+          recentMenu.actor.set_margin_left(RECENT_MENU_GAP_PX);
         } else {
-          externalMenu.actor.style = `margin-left: ${EXTERNAL_MENU_GAP_PX}px;`;
+          recentMenu.actor.style = `margin-left: ${RECENT_MENU_GAP_PX}px;`;
         }
-        externalMenu.actor.translation_x = EXTERNAL_MENU_GAP_PX;
-        externalMenu.actor.track_hover = true;
-        externalMenu.actor.reactive = true;
+        recentMenu.actor.translation_x = RECENT_MENU_GAP_PX;
+        recentMenu.actor.track_hover = true;
+        recentMenu.actor.reactive = true;
 
-        Main.layoutManager.addTopChrome(externalMenu.actor);
+        recentMenuHoverActor = recentMenu.box ?? recentMenu.actor;
+        // Track hover on the visible menu box to detect real pointer exits.
+        if (recentMenuHoverActor) {
+          recentMenuHoverActor.track_hover = true;
+          recentMenuHoverActor.reactive = true;
+        }
+
+        Main.layoutManager.addTopChrome(recentMenu.actor);
         chromeAdded = true;
 
-        if (!managerRegistered && this._externalMenuManager) {
-          this._externalMenuManager.addMenu(externalMenu);
+        if (!managerRegistered && this._recentMenuManager) {
+          this._recentMenuManager.addMenu(recentMenu);
           managerRegistered = true;
         }
 
-        populateMenu(externalMenu);
+        populateMenu(recentMenu);
         connectMainMenuItemSignals();
 
-        externalMenuMenuSignalIds.push(
-          externalMenu.connect('open-state-changed', (_, open) => {
+        recentMenuMenuSignalIds.push(
+          recentMenu.connect('open-state-changed', (_, open) => {
             if (open) {
               cancelClose();
             } else {
-              closeAndDestroyMenu();
+              closeAndDestroyRecentMenu();
             }
           })
         );
 
-        externalMenuSignalIds.push(
-          externalMenu.actor.connect('enter-event', () => {
+        if (recentMenuHoverActor) {
+          const enterId = recentMenuHoverActor.connect('enter-event', () => {
             cancelClose();
+            cancelOpenDelay();
             return Clutter.EVENT_PROPAGATE;
-          })
-        );
-        externalMenuSignalIds.push(
-          externalMenu.actor.connect('leave-event', () => {
+          });
+          recentMenuSignalIds.push({ target: recentMenuHoverActor, id: enterId });
+
+          const leaveId = recentMenuHoverActor.connect('leave-event', () => {
             scheduleClose();
             return Clutter.EVENT_PROPAGATE;
-          })
-        );
+          });
+          recentMenuSignalIds.push({ target: recentMenuHoverActor, id: leaveId });
+        }
 
         if (mainMenuCloseId === 0) {
           mainMenuCloseId = this.menu.connect('open-state-changed', (_, open) => {
             if (!open) {
-              closeAndDestroyMenu();
+              closeAndDestroyRecentMenu();
             }
           });
         }
 
         if (submenuDestroyId === 0) {
           submenuDestroyId = submenuItem.connect('destroy', () => {
-            closeAndDestroyMenu();
+            closeAndDestroyRecentMenu();
           });
         }
 
-        return externalMenu;
+        return recentMenu;
       };
 
-      const PointerRegion = {
+      const PointerState = {
         INSIDE: 0,
         BRIDGE: 1,
         OUTSIDE: 2,
@@ -464,14 +533,14 @@ export const KiwiMenu = GObject.registerClass(
         };
       };
 
-      const getPointerRegion = () => {
-        if (!externalMenu) {
-          return PointerRegion.OUTSIDE;
+      const getPointerState = () => {
+        if (!recentMenu) {
+          return PointerState.OUTSIDE;
         }
 
         const [pointerX, pointerY] = global.get_pointer();
         const submenuBounds = getActorBounds(submenuItem.actor);
-        const externalBounds = getActorBounds(externalMenu.actor);
+        const recentBounds = getActorBounds(recentMenuHoverActor ?? recentMenu.actor);
 
         const pointWithin = (bounds, tolerance = 0) =>
           bounds &&
@@ -482,38 +551,52 @@ export const KiwiMenu = GObject.registerClass(
 
         if (
           pointWithin(submenuBounds, POINTER_TOLERANCE_PX) ||
-          pointWithin(externalBounds, POINTER_TOLERANCE_PX)
+          pointWithin(recentBounds, POINTER_TOLERANCE_PX)
         ) {
-          return PointerRegion.INSIDE;
+          return PointerState.INSIDE;
         }
 
-        if (!submenuBounds || !externalBounds) {
-          return PointerRegion.OUTSIDE;
+        if (!submenuBounds || !recentBounds) {
+          return PointerState.OUTSIDE;
         }
 
-        const bridgeX1 = Math.min(submenuBounds.x2, externalBounds.x1);
-        const bridgeX2 = Math.max(submenuBounds.x2, externalBounds.x1);
-        const bridgeY1 = Math.min(submenuBounds.y1, externalBounds.y1);
-        const bridgeY2 = Math.max(submenuBounds.y2, externalBounds.y2);
+        const bridgeX1 = Math.min(submenuBounds.x2, recentBounds.x1);
+        const bridgeX2 = Math.max(submenuBounds.x2, recentBounds.x1);
+        const overlapTop = Math.max(submenuBounds.y1, recentBounds.y1);
+        const overlapBottom = Math.min(submenuBounds.y2, recentBounds.y2);
 
-        if (
-          pointerX >= bridgeX1 - POINTER_TOLERANCE_PX &&
-          pointerX <= bridgeX2 + POINTER_TOLERANCE_PX &&
-          pointerY >= bridgeY1 - POINTER_TOLERANCE_PX &&
-          pointerY <= bridgeY2 + POINTER_TOLERANCE_PX
-        ) {
-          return PointerRegion.BRIDGE;
+        if (overlapBottom >= overlapTop) {
+          // Allow a narrow horizontal bridge between the submenu and popup.
+          // Require the pointer to stay near or to the right of the submenu edge
+          // so sliding back to the main menu exits the bridge promptly.
+          const submenuRight = submenuBounds.x2;
+          const recentLeft = recentBounds.x1;
+          const gapWidth = Math.max(0, bridgeX2 - bridgeX1);
+          const leftTolerance = Math.min(4, gapWidth);
+          const rightTolerance = POINTER_TOLERANCE_PX;
+
+          if (
+            pointerX >= submenuRight - leftTolerance &&
+            pointerX <= recentLeft + rightTolerance &&
+            pointerY >= overlapTop - POINTER_TOLERANCE_PX &&
+            pointerY <= overlapBottom + POINTER_TOLERANCE_PX
+          ) {
+            return PointerState.BRIDGE;
+          }
         }
 
-        return PointerRegion.OUTSIDE;
+        return PointerState.OUTSIDE;
       };
 
-      const closeAndDestroyMenu = () => {
-        if (!externalMenu || externalMenuClosing) {
+      const closeAndDestroyRecentMenu = () => {
+        cancelOpenDelay();
+
+        if (!recentMenu || recentMenuClosing) {
+          clearSubmenuHover();
           return;
         }
 
-        externalMenuClosing = true;
+        recentMenuClosing = true;
 
         try {
           cancelClose();
@@ -532,52 +615,56 @@ export const KiwiMenu = GObject.registerClass(
             submenuDestroyId = 0;
           }
 
-          disconnectExternalMenuSignals();
+          disconnectRecentMenuSignals();
           disconnectMainMenuItemSignals();
 
-          if (externalMenu.isOpen) {
-            externalMenu.close(true);
+          if (recentMenu.isOpen) {
+            recentMenu.close(true);
           }
 
-          if (managerRegistered && this._externalMenuManager) {
-            this._externalMenuManager.removeMenu(externalMenu);
+          if (managerRegistered && this._recentMenuManager) {
+            this._recentMenuManager.removeMenu(recentMenu);
             managerRegistered = false;
           }
 
           if (chromeAdded) {
-            Main.layoutManager.removeChrome(externalMenu.actor);
+            Main.layoutManager.removeChrome(recentMenu.actor);
             chromeAdded = false;
           }
 
-          externalMenu.destroy();
-          externalMenu = null;
+          recentMenu.destroy();
+          recentMenu = null;
+          recentMenuHoverActor = null;
+          clearSubmenuHover();
         } finally {
-          externalMenuClosing = false;
+          recentMenuClosing = false;
         }
       };
 
       submenuItem.actor.connect('enter-event', () => {
         cancelClose();
-        const menu = ensureExternalMenu();
-        menu.open(true);
+        scheduleOpen();
         return Clutter.EVENT_PROPAGATE;
       });
 
       submenuItem.actor.connect('leave-event', () => {
+        cancelOpenDelay();
         scheduleClose();
         return Clutter.EVENT_PROPAGATE;
       });
 
       submenuItem.actor.connect('button-press-event', () => {
         cancelClose();
-        const menu = ensureExternalMenu();
+        cancelOpenDelay();
+        const menu = ensureRecentMenu();
         menu.open(true);
         return Clutter.EVENT_STOP;
       });
 
       submenuItem.connect('activate', () => {
         cancelClose();
-        const menu = ensureExternalMenu();
+        cancelOpenDelay();
+        const menu = ensureRecentMenu();
         menu.open(true);
       });
 

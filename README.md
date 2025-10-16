@@ -8,7 +8,7 @@ Kiwi Menu is a macOS-inspired menu bar for GNOME Shell. It replaces the Activiti
 - Customizable menu icon with multiple bundled glyphs
 - Optional hiding of the default Activities button
 - Quick launchers for session actions such as lock, logout, restart, and power off
-- Expandable submenus that open adjacent to the panel button
+- Recent items popup that opens adjacent to the panel button
 - Preferences window that remembers its size between sessions
 
 ## Requirements

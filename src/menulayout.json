@@ -21,7 +21,7 @@
     "type": "separator"
   },
   {
-    "type": "expandable-menu",
+    "type": "recent-items",
     "title": "Recent Items"
   },
   {
