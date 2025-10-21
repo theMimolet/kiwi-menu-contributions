@@ -6,6 +6,11 @@
   margin-right: 6px;
 }
 
+.menu-button, 
+.menu-button > StIcon {
+  icon-shadow: 0 1px 3px 3px rgba(0, 0, 0, 0.15);
+}
+
 .kiwi-recent-menu {
   margin-left: 16px;
 }
