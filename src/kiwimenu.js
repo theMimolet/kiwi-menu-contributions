@@ -16,15 +16,14 @@ import * as Util from 'resource:///org/gnome/shell/misc/util.js';
 import { openForceQuitOverlay } from './forceQuitOverlay.js';
 import { RecentItemsSubmenu } from './recentItemsSubmenu.js';
 
-const TEXT_DECODER = new TextDecoder();
-
 function loadJsonFile(basePath, segments) {
+  const textDecoder = new TextDecoder();
   const filePath = GLib.build_filenamev([basePath, ...segments]);
 
   try {
     const file = Gio.File.new_for_path(filePath);
     const [, contents] = file.load_contents(null);
-    const parsed = JSON.parse(TEXT_DECODER.decode(contents));
+    const parsed = JSON.parse(textDecoder.decode(contents));
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     logError(error, `Failed to load JSON data from ${filePath}`);

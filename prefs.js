@@ -12,16 +12,10 @@ import Gtk from 'gi://Gtk';
 
 import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-const TEXT_DECODER = new TextDecoder();
-const SOURCE_DIR = Gio.File.new_for_uri(import.meta.url).get_parent();
-
-const ICONS = Object.freeze(
-  loadIconsMetadata().map((icon) => Object.freeze(icon))
-);
-
-function loadIconsMetadata() {
+function loadIconsMetadata(sourcePath) {
+  const textDecoder = new TextDecoder();
   const filePath = GLib.build_filenamev([
-    SOURCE_DIR?.get_path() ?? '.',
+    sourcePath,
     'src',
     'icons.json',
   ]);
@@ -29,7 +23,7 @@ function loadIconsMetadata() {
   try {
     const file = Gio.File.new_for_path(filePath);
     const [, contents] = file.load_contents(null);
-    const data = JSON.parse(TEXT_DECODER.decode(contents));
+    const data = JSON.parse(textDecoder.decode(contents));
     return Array.isArray(data) ? data : [];
   } catch (error) {
     logError(error, `Failed to load icons metadata from ${filePath}`);
@@ -39,7 +33,7 @@ function loadIconsMetadata() {
 
 const OptionsPage = GObject.registerClass(
   class OptionsPage extends Adw.PreferencesPage {
-    constructor(settings) {
+    constructor(settings, sourcePath) {
       super({
         title: 'Options',
         icon_name: 'preferences-other-symbolic',
@@ -48,13 +42,15 @@ const OptionsPage = GObject.registerClass(
 
       this._settings = settings;
 
+      const icons = loadIconsMetadata(sourcePath);
+
       const menuGroup = new Adw.PreferencesGroup({
         title: 'Menu',
         description: 'Adjust how the Kiwi Menu looks and behaves.',
       });
 
       const iconsList = new Gtk.StringList();
-      ICONS.forEach((icon) => iconsList.append(icon.title));
+      icons.forEach((icon) => iconsList.append(icon.title));
 
       const iconSelectorRow = new Adw.ComboRow({
         title: 'Menu Icon',
@@ -109,7 +105,7 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     this._ensureVersionCss(window);
 
     const aboutPage = this._createAboutPage(window);
-    const optionsPage = new OptionsPage(settings);
+    const optionsPage = new OptionsPage(settings, this.path);
 
     window.add(aboutPage);
     window.add(optionsPage);

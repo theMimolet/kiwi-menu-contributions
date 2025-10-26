@@ -114,9 +114,13 @@ export const RecentItemsSubmenu = GObject.registerClass(
     });
   }
 
-  vfunc_destroy() {
+  destroy() {
+    // Clean up all timeouts before destroying
+    this._cancelClose();
+    this._cancelOpenDelay();
+    this._stopGlobalHoverMonitor();
     this._closeAndDestroyRecentMenu();
-    super.vfunc_destroy();
+    super.destroy();
   }
 
   _createSectionHeader(text) {
