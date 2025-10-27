@@ -14,6 +14,8 @@ This directory contains translation files for the Kiwi Menu extension.
 Currently available translations:
 - **German (de)** - Deutsch
 - **Spanish (es)** - Español
+- **French (fr)** - Français
+- **Latvian (lv)** - Latviešu
 
 ## Adding a New Translation
 
@@ -99,6 +101,8 @@ This will create the `locale/` directory with compiled translations.
 
 - German (de): Community contribution welcome
 - Spanish (es): Community contribution welcome
+- French (fr): Community contribution welcome
+- Latvian (lv): Community contribution welcome
 
 ## Contributing
 

@@ -36,6 +36,8 @@ Kiwi Menu supports multiple languages. Currently available translations:
 - **English** (default)
 - **German** (Deutsch)
 - **Spanish** (Español)
+- **French** (Français)
+- **Latvian** (Latviešu)
 
 ### Contributing Translations
 
