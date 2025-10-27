@@ -10,7 +10,7 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
 
-import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+import { ExtensionPreferences, gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 function loadIconsMetadata(sourcePath) {
   const textDecoder = new TextDecoder();
@@ -33,28 +33,29 @@ function loadIconsMetadata(sourcePath) {
 
 const OptionsPage = GObject.registerClass(
   class OptionsPage extends Adw.PreferencesPage {
-    constructor(settings, sourcePath) {
+    constructor(settings, sourcePath, gettextFunc) {
       super({
-        title: 'Options',
+        title: gettextFunc('Options'),
         icon_name: 'preferences-other-symbolic',
         name: 'OptionsPage',
       });
 
       this._settings = settings;
+      this._ = gettextFunc;
 
       const icons = loadIconsMetadata(sourcePath);
 
       const menuGroup = new Adw.PreferencesGroup({
-        title: 'Menu',
-        description: 'Adjust how the Kiwi Menu looks and behaves.',
+        title: this._('Menu'),
+        description: this._('Adjust how the Kiwi Menu looks and behaves.'),
       });
 
       const iconsList = new Gtk.StringList();
       icons.forEach((icon) => iconsList.append(icon.title));
 
       const iconSelectorRow = new Adw.ComboRow({
-        title: 'Menu Icon',
-        subtitle: 'Change the menu icon',
+        title: this._('Menu Icon'),
+        subtitle: this._('Choose the icon to display in the panel.'),
         model: iconsList,
         selected: this._settings.get_int('icon'),
       });
@@ -62,8 +63,8 @@ const OptionsPage = GObject.registerClass(
       menuGroup.add(iconSelectorRow);
 
       const behaviorGroup = new Adw.PreferencesGroup({
-        title: 'Panel',
-        description: 'Hide or show the Activities button from the top bar.',
+        title: this._('Panel'),
+        description: this._('Hide or show the Activities button from the top bar.'),
       });
 
       const activityMenuSwitch = new Gtk.Switch({
@@ -72,8 +73,8 @@ const OptionsPage = GObject.registerClass(
       });
 
       const activityMenuRow = new Adw.ActionRow({
-        title: 'Hide Activities Menu',
-        subtitle: 'Toggle to hide the Activities menu button',
+        title: this._('Hide Activities Menu'),
+        subtitle: this._('Display the Activities button in the top panel.'),
         activatable_widget: activityMenuSwitch,
       });
       activityMenuRow.add_suffix(activityMenuSwitch);
@@ -104,8 +105,9 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     window.set_search_enabled(true);
     this._ensureVersionCss(window);
 
-    const aboutPage = this._createAboutPage(window);
-    const optionsPage = new OptionsPage(settings, this.path);
+    const _ = this.gettext.bind(this);
+    const aboutPage = this._createAboutPage(window, _);
+    const optionsPage = new OptionsPage(settings, this.path, _);
 
     window.add(aboutPage);
     window.add(optionsPage);
@@ -152,9 +154,9 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     window._kiwimenuVersionCssProvider = cssProvider;
   }
 
-  _createAboutPage(window) {
+  _createAboutPage(window, _) {
     const aboutPage = new Adw.PreferencesPage({
-      title: 'About',
+      title: _('About'),
       icon_name: 'help-about-symbolic',
       name: 'AboutPage',
     });
@@ -245,7 +247,7 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     linksGroup.add(
       this._createLinkRow(
         window,
-        'Website',
+        _('Website'),
         normalizedBaseUrl
       )
     );
@@ -257,7 +259,7 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     issuesGroup.add(
       this._createLinkRow(
         window,
-        'Report an Issue',
+        _('Report an Issue'),
         `${normalizedBaseUrl}/issues`
       )
     );
@@ -269,12 +271,12 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     legalGroup.add(
       this._createLinkRow(
         window,
-        'Credits',
+        _('Credits'),
         `${normalizedBaseUrl}/graphs/contributors`
       )
     );
     legalGroup.add(
-      this._createLegalRow(window, normalizedBaseUrl)
+      this._createLegalRow(window, normalizedBaseUrl, _)
     );
 
     aboutPage.add(legalGroup);
@@ -296,19 +298,19 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     return row;
   }
 
-  _createLegalRow(window, baseUrl) {
+  _createLegalRow(window, baseUrl, _) {
     const row = new Adw.ActionRow({
-      title: 'Legal',
+      title: _('Legal'),
       activatable: true,
     });
     row.add_suffix(new Gtk.Image({ icon_name: 'go-next-symbolic' }));
     row.connect('activated', () => {
-      this._openLegalDialog(window, baseUrl);
+      this._openLegalDialog(window, baseUrl, _);
     });
     return row;
   }
 
-  _openLegalDialog(window, baseUrl) {
+  _openLegalDialog(window, baseUrl, _) {
     const dialog = new Adw.Dialog({
       content_width: 420,
       content_height: 560,
@@ -318,29 +320,28 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     const toolbarView = new Adw.ToolbarView();
     const headerBar = new Adw.HeaderBar({
       show_title: true,
-      title_widget: new Adw.WindowTitle({ title: 'Legal' }),
+      title_widget: new Adw.WindowTitle({ title: _('Legal') }),
     });
     toolbarView.add_top_bar(headerBar);
 
     const legalPage = new Adw.PreferencesPage();
 
     const licenseGroup = new Adw.PreferencesGroup({
-      title: 'License',
-      description: 'Kiwi Menu is free and open source software.',
+      title: _('License'),
+      description: _('Kiwi Menu is free and open source software.'),
     });
     licenseGroup.add(
       this._createLinkRow(
         window,
-        'GNU General Public License v3.0',
+        _('GNU General Public License v3.0'),
         `${baseUrl}/blob/main/LICENSE`
       )
     );
     legalPage.add(licenseGroup);
 
     const copyrightGroup = new Adw.PreferencesGroup({
-      title: 'Copyright',
-      description:
-        'Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General Public License version 3 or later.',
+      title: _('Copyright'),
+      description: _('Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General Public License version 3 or later.'),
     });
     legalPage.add(copyrightGroup);
 

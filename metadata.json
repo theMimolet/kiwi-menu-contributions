@@ -3,6 +3,7 @@
   "donations": {
     "custom": "https://revolut.me/arnisk"
   },
+  "gettext-domain": "kiwimenu@kemma",
   "name": "Kiwi Menu",
   "settings-schema": "org.gnome.shell.extensions.kiwimenu",
   "shell-version": [
@@ -15,5 +16,5 @@
   "url": "https://github.com/kem-a/kiwi-menu",
   "uuid": "kiwimenu@kemma",
   "version": "",
-  "version-name": "1.0.1"
+  "version-name": "1.1.0"
 }

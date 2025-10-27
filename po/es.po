@@ -1,0 +1,177 @@
+# Spanish translation for Kiwi Menu
+# Copyright (C) 2025 Arnis Kemlers
+# This file is distributed under the same license as the kiwimenu package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: kiwimenu\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-27 12:00+0000\n"
+"PO-Revision-Date: 2025-10-27 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/kiwimenu.js
+msgid "About This PC"
+msgstr "Acerca de este equipo"
+
+#: src/kiwimenu.js
+msgid "System Settings..."
+msgstr "Configuración del sistema..."
+
+#: src/kiwimenu.js
+msgid "App Store..."
+msgstr "Tienda de aplicaciones..."
+
+#: src/kiwimenu.js
+msgid "Recent Items"
+msgstr "Elementos recientes"
+
+#: src/kiwimenu.js
+msgid "Force Quit"
+msgstr "Forzar salida"
+
+#: src/kiwimenu.js
+msgid "Sleep"
+msgstr "Suspender"
+
+#: src/kiwimenu.js
+msgid "Restart..."
+msgstr "Reiniciar..."
+
+#: src/kiwimenu.js
+msgid "Shut Down..."
+msgstr "Apagar..."
+
+#: src/kiwimenu.js
+msgid "Lock Screen"
+msgstr "Bloquear pantalla"
+
+#: src/kiwimenu.js
+msgid "Log Out..."
+msgstr "Cerrar sesión..."
+
+#: src/kiwimenu.js
+#, javascript-format
+msgid "Log Out %s..."
+msgstr "Cerrar sesión de %s..."
+
+#: src/recentItemsSubmenu.js
+msgid "No recent items"
+msgstr "No hay elementos recientes"
+
+#: src/recentItemsSubmenu.js
+msgid "Files"
+msgstr "Archivos"
+
+#: src/recentItemsSubmenu.js
+msgid "Folders"
+msgstr "Carpetas"
+
+#: src/recentItemsSubmenu.js
+msgid "Clear menu"
+msgstr "Limpiar menú"
+
+#: prefs.js
+msgid "Panel"
+msgstr "Panel"
+
+#: prefs.js
+msgid "Hide or show the Activities button from the top bar."
+msgstr "Ocultar o mostrar el botón Actividades en la barra superior."
+
+#: prefs.js
+msgid "Hide Activities Menu"
+msgstr "Ocultar menú de Actividades"
+
+#: prefs.js
+msgid "Options"
+msgstr "Opciones"
+
+#: prefs.js
+msgid "Menu"
+msgstr "Menú"
+
+#: prefs.js
+msgid "Adjust how the Kiwi Menu looks and behaves."
+msgstr "Ajusta cómo se ve y se comporta el menú Kiwi."
+
+#: prefs.js
+msgid "Menu Icon"
+msgstr "Icono del menú"
+
+#: prefs.js
+msgid "Choose the icon to display in the panel."
+msgstr "Elige el icono para mostrar en el panel."
+
+#: prefs.js
+msgid "Show Activities Button"
+msgstr "Mostrar botón de Actividades"
+
+#: prefs.js
+msgid "Display the Activities button in the top panel."
+msgstr "Mostrar el botón Actividades en el panel superior."
+
+#: prefs.js
+msgid "About"
+msgstr "Acerca de"
+
+#: prefs.js
+msgid "Extension Version"
+msgstr "Versión de la extensión"
+
+#: prefs.js
+msgid "GNOME Shell Version"
+msgstr "Versión de GNOME Shell"
+
+#: prefs.js
+msgid "Help & Support"
+msgstr "Ayuda y soporte"
+
+#: prefs.js
+msgid "Report a Bug"
+msgstr "Reportar un error"
+
+#: prefs.js
+msgid "View on GitHub"
+msgstr "Ver en GitHub"
+
+#: prefs.js
+msgid "Website"
+msgstr "Sitio web"
+
+#: prefs.js
+msgid "Report an Issue"
+msgstr "Reportar un problema"
+
+#: prefs.js
+msgid "Credits"
+msgstr "Créditos"
+
+#: prefs.js
+msgid "Legal"
+msgstr "Legal"
+
+#: prefs.js
+msgid "License"
+msgstr "Licencia"
+
+#: prefs.js
+msgid "Kiwi Menu is free and open source software."
+msgstr "Kiwi Menu es software libre y de código abierto."
+
+#: prefs.js
+msgid "GNU General Public License v3.0"
+msgstr "Licencia Pública General de GNU v3.0"
+
+#: prefs.js
+msgid "Copyright"
+msgstr "Derechos de autor"
+
+#: prefs.js
+msgid "Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General Public License version 3 or later."
+msgstr "Copyright © 2025 Arnis Kemlers. Licenciado bajo los términos de la Licencia Pública General de GNU versión 3 o posterior."

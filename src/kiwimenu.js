@@ -33,11 +33,12 @@ function loadJsonFile(basePath, segments) {
 
 export const KiwiMenu = GObject.registerClass(
   class KiwiMenu extends PanelMenu.Button {
-    _init(settings, extensionPath) {
+    _init(settings, extensionPath, extension) {
       super._init(0.5, 'KiwiMenu');
 
   this._settings = settings;
   this._extensionPath = extensionPath;
+  this._extension = extension;
   this._settingsSignalIds = [];
   this._menuOpenSignalId = 0;
   this._recentMenuManager = new PopupMenu.PopupMenuManager(this);
@@ -133,6 +134,10 @@ export const KiwiMenu = GObject.registerClass(
       }
     }
 
+    _gettext(text) {
+      return this._extension?.gettext(text) ?? text;
+    }
+
     _showActivitiesButton() {
       const container = this._getActivitiesContainer();
       if (container) {
@@ -183,10 +188,17 @@ export const KiwiMenu = GObject.registerClass(
       const layoutSource = this._layout ?? [];
 
       return layoutSource.map((item) => {
+        // Translate menu title
+        let translatedTitle = item.title;
+        if (item.title) {
+          translatedTitle = this._gettext(item.title);
+        }
+
+        // Special handling for logout with username
         if (item.type === 'menu' && item.cmds?.includes('--logout')) {
           const title = fullName
-            ? `Log Out ${fullName}...`
-            : item.title;
+            ? this._gettext('Log Out %s...').format(fullName)
+            : translatedTitle;
           return {
             ...item,
             title,
@@ -196,6 +208,7 @@ export const KiwiMenu = GObject.registerClass(
 
         return {
           ...item,
+          title: translatedTitle,
           cmds: item.cmds ? [...item.cmds] : undefined,
         };
       });
@@ -218,7 +231,7 @@ export const KiwiMenu = GObject.registerClass(
     }
 
     _makeRecentItemsMenu(title) {
-      const submenuItem = new RecentItemsSubmenu(title, this.menu, this._recentMenuManager);
+      const submenuItem = new RecentItemsSubmenu(title, this.menu, this._recentMenuManager, this._extension);
       this.menu.addMenuItem(submenuItem);
     }
 

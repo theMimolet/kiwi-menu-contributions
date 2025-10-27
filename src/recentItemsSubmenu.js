@@ -36,7 +36,7 @@ const PointerState = {
  */
 export const RecentItemsSubmenu = GObject.registerClass(
   class RecentItemsSubmenu extends PopupMenu.PopupBaseMenuItem {
-    _init(title, parentMenu, recentMenuManager) {
+    _init(title, parentMenu, recentMenuManager, extension) {
       super._init({
         reactive: true,
         can_focus: true,
@@ -45,6 +45,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
 
       this._parentMenu = parentMenu;
       this._recentMenuManager = recentMenuManager;
+      this._extension = extension;
 
     // State tracking
     this._recentMenu = null;
@@ -123,6 +124,10 @@ export const RecentItemsSubmenu = GObject.registerClass(
     super.destroy();
   }
 
+  _gettext(text) {
+    return this._extension?.gettext(text) ?? text;
+  }
+
   _createSectionHeader(text) {
     const header = new PopupMenu.PopupBaseMenuItem({
       reactive: false,
@@ -146,7 +151,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
 
     const recentItems = this._getRecentItems();
     if (recentItems.length === 0) {
-      const placeholder = new PopupMenu.PopupMenuItem('No recent items');
+      const placeholder = new PopupMenu.PopupMenuItem(this._gettext('No recent items'));
       placeholder.setSensitive(false);
       menu.addMenuItem(placeholder);
       return;
@@ -175,7 +180,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
 
     // Add files section
     if (files.length > 0) {
-      const filesHeader = this._createSectionHeader('Files');
+      const filesHeader = this._createSectionHeader(this._gettext('Files'));
       menu.addMenuItem(filesHeader);
 
       files.forEach(({ title: itemTitle, uri }) => {
@@ -202,7 +207,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
 
     // Add folders section
     if (folders.length > 0) {
-      const foldersHeader = this._createSectionHeader('Folders');
+      const foldersHeader = this._createSectionHeader(this._gettext('Folders'));
       menu.addMenuItem(foldersHeader);
 
       folders.forEach(({ title: itemTitle, uri }) => {
@@ -226,7 +231,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
     if (hasEntries) {
       menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
-      const clearItem = new PopupMenu.PopupMenuItem('Clear menu');
+      const clearItem = new PopupMenu.PopupMenuItem(this._gettext('Clear menu'));
       clearItem.connect('activate', () => this._clearRecentItems());
       menu.addMenuItem(clearItem);
     }
