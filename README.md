@@ -2,7 +2,7 @@
 
 Kiwi Menu replaces the Activities button with a compact, macOS-inspired launcher that keeps your most common session actions one click away.
 
-[<img width="228" height="106" alt="Get it on GNOME Extensions" src="https://github.com/user-attachments/assets/8aa08f2b-a902-48ca-999d-149591b49da7" />](https://github.com/kem-a/kiwimenu-kemma/releases)
+[<img width="228" height="106" alt="Get it on GNOME Extensions" src="https://github.com/user-attachments/assets/8aa08f2b-a902-48ca-999d-149591b49da7" />](https://extensions.gnome.org/extension/8697/kiwi-menu/)
 
 ## Features
 
