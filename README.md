@@ -16,23 +16,19 @@ Kiwi Menu replaces the Activities button with a compact, macOS-inspired launcher
 <img width="599" height="450" alt="Screenshot From 2025-10-24 17-31-09" src="https://github.com/user-attachments/assets/bc2c7893-42a0-4f74-bf98-4764224f9985" />
 
 
-## Testing changes
+## Other extensions
 
-1. Apply your edits.
-2. Recompile the schema if keys changed.
-3. Reload the extension:
-   ```bash
-   gnome-extensions disable kiwimenu@kemma
-   gnome-extensions enable kiwimenu@kemma
-   ```
-4. Tail GNOME Shell logs when debugging:
-   ```bash
-   journalctl --user-unit gnome-shell -f
-   ```
+Recommended to pair with [Kiwi is not Apple](https://extensions.gnome.org/extension/8276/kiwi-is-not-apple/).
 
 ## Known issues
 
-- Recent files require GNOME to populate `recently-used.xbel`; newly installed systems may need activity before entries appear.
+- None
+
+## Future implementations
+
+- [ ] translations
+- [ ] option to hide default Gnome Power options in QuickSettings
+- [ ] Force quit to rebuild using popup window with a list of killable apps instead of crossair
 
 ## License
 
