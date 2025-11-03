@@ -79,7 +79,26 @@ const OptionsPage = GObject.registerClass(
         valign: Gtk.Align.CENTER,
       });
       restoreButton.add_css_class?.('circular');
+
+      const acceptButton = new Gtk.Button({
+        icon_name: 'emblem-ok-symbolic',
+        has_frame: false,
+        tooltip_text: this._('Apply Changes'),
+        valign: Gtk.Align.CENTER,
+      });
+      acceptButton.add_css_class?.('circular');
+      acceptButton.set_visible(false);
+      acceptButton.set_sensitive(false);
+
+      appStoreCommandRow.add_suffix?.(acceptButton);
       appStoreCommandRow.add_suffix?.(restoreButton);
+
+      const clearEntryFocus = () => {
+        const root = appStoreCommandRow.get_root?.();
+        if (root && typeof root.set_focus === 'function') {
+          root.set_focus(null);
+        }
+      };
 
       const updateRestoreButtonState = () => {
         const currentText = appStoreCommandRow.get_text
@@ -88,29 +107,39 @@ const OptionsPage = GObject.registerClass(
         const isDefault = currentText.trim() === defaultAppStoreCommand;
         restoreButton.set_sensitive(!isDefault);
         restoreButton.set_visible(!isDefault);
+        acceptButton.set_sensitive(!isDefault);
       };
 
       restoreButton.connect('clicked', () => {
         appStoreCommandRow.set_text(defaultAppStoreCommand);
+        clearEntryFocus();
+      });
+
+      acceptButton.connect('clicked', () => {
+        clearEntryFocus();
       });
 
       appStoreCommandRow.connect('notify::text', updateRestoreButtonState);
       updateRestoreButtonState();
 
-      // Handle Escape key to unfocus the entry
       const keyController = new Gtk.EventControllerKey();
-      keyController.connect('key-pressed', (controller, keyval, keycode, state) => {
+      keyController.connect('key-pressed', (controller, keyval) => {
         if (keyval === Gdk.KEY_Escape) {
-          // Remove focus from the entry
-          const root = appStoreCommandRow.get_root?.();
-          if (root && typeof root.set_focus === 'function') {
-            root.set_focus(null);
-          }
+          clearEntryFocus();
           return true;
         }
         return false;
       });
       appStoreCommandRow.add_controller?.(keyController);
+
+      const focusController = new Gtk.EventControllerFocus();
+      focusController.connect('enter', () => {
+        acceptButton.set_visible(true);
+      });
+      focusController.connect('leave', () => {
+        acceptButton.set_visible(false);
+      });
+      appStoreCommandRow.add_controller?.(focusController);
 
       menuGroup.add(appStoreCommandRow);
 
