@@ -8,17 +8,26 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import St from 'gi://St';
 import Clutter from 'gi://Clutter';
+import Shell from 'gi://Shell';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import {DocumentTooltip} from './documentTooltip.js';
 
 // Limits for recent items per section
-const FILES_RECENT_LIMIT = 10;
-const FOLDERS_RECENT_LIMIT = 5;
+const FILES_RECENT_LIMIT = 12;
+const APPLICATIONS_RECENT_LIMIT = 8;
 const RECENT_ITEMS_FILE = GLib.build_filenamev([
   GLib.get_user_data_dir(),
   'recently-used.xbel',
 ]);
+const APPLICATION_STATE_FILE = GLib.build_filenamev([
+  GLib.get_user_data_dir(),
+  'gnome-shell',
+  'application_state',
+]);
+const CLEAR_APPLICATION_MENU = true; // will keep it here for now, in future might add to settings
+const APPLICATION_SORT_MODE = 'usage'; // 'usage' or 'recent'
 const HOVER_CLOSE_DELAY_MS = 200;
 const RECENT_OPEN_DELAY_MS = 500;
 const POINTER_TOLERANCE_PX = 8;
@@ -96,7 +105,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
         this._setSubmenuHover(true);
       }
       this._scheduleClose();
-      return submenuOpen ? Clutter.EVENT_STOP : Clutter.EVENT_PROPAGATE;
+      return Clutter.EVENT_PROPAGATE;
     });
 
     this.actor.connect('button-press-event', () => {
@@ -150,78 +159,67 @@ export const RecentItemsSubmenu = GObject.registerClass(
     menu.removeAll();
 
     const recentItems = this._getRecentItems();
-    if (recentItems.length === 0) {
+    const recentApplications = this._getRecentApplications(APPLICATIONS_RECENT_LIMIT);
+
+    const files = [];
+    for (const item of recentItems) {
+      if (files.length >= FILES_RECENT_LIMIT) {
+        break;
+      }
+
+      files.push(item);
+    }
+
+    const hasFiles = files.length > 0;
+    const hasApplications = recentApplications.length > 0;
+
+    if (!hasFiles && !hasApplications) {
       const placeholder = new PopupMenu.PopupMenuItem(this._gettext('No recent items'));
       placeholder.setSensitive(false);
       menu.addMenuItem(placeholder);
       return;
     }
 
-    // Separate files and folders with per-section limits
-    const files = [];
-    const folders = [];
-    for (const item of recentItems) {
-      if (item.isDirectory) {
-        if (folders.length < FOLDERS_RECENT_LIMIT) {
-          folders.push(item);
-        }
-      } else {
-        if (files.length < FILES_RECENT_LIMIT) {
-          files.push(item);
-        }
-      }
-
-      if (files.length >= FILES_RECENT_LIMIT && folders.length >= FOLDERS_RECENT_LIMIT) {
-        break;
-      }
-    }
-
     let hasEntries = false;
 
-    // Add files section
-    if (files.length > 0) {
-      const filesHeader = this._createSectionHeader(this._gettext('Documents'));
-      menu.addMenuItem(filesHeader);
-
-      files.forEach(({ title: itemTitle, uri }) => {
-        const recentMenuItem = new PopupMenu.PopupMenuItem(itemTitle);
-        recentMenuItem.connect('activate', () => {
-          try {
-            const context = global.create_app_launch_context(0, -1);
-            Gio.AppInfo.launch_default_for_uri(uri, context);
-          } catch (error) {
-            logError(error, `Failed to open recent item: ${uri}`);
-          }
-          this._parentMenu.close(true);
-          this._closeAndDestroyRecentMenu();
-        });
-        menu.addMenuItem(recentMenuItem);
-      });
-
-      if (folders.length > 0) {
+    if (hasApplications) {
+      if (hasEntries) {
         menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
       }
+
+      const applicationsHeader = this._createSectionHeader(this._gettext('Applications'));
+      menu.addMenuItem(applicationsHeader);
+
+      recentApplications.forEach(({ title: appTitle, appInfo, gicon, desktopId }) => {
+        const appMenuItem = this._createMenuItemWithIcon(
+          appTitle,
+          gicon,
+          'application-x-executable-symbolic'
+        );
+        appMenuItem.connect('activate', () => this._launchRecentApplication(appInfo, desktopId));
+        menu.addMenuItem(appMenuItem);
+      });
 
       hasEntries = true;
     }
 
-    // Add folders section
-    if (folders.length > 0) {
-      const foldersHeader = this._createSectionHeader(this._gettext('Folders'));
-      menu.addMenuItem(foldersHeader);
+    if (hasFiles) {
+      if (hasEntries) {
+        menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+      }
 
-      folders.forEach(({ title: itemTitle, uri }) => {
-        const recentMenuItem = new PopupMenu.PopupMenuItem(itemTitle);
-        recentMenuItem.connect('activate', () => {
-          try {
-            const context = global.create_app_launch_context(0, -1);
-            Gio.AppInfo.launch_default_for_uri(uri, context);
-          } catch (error) {
-            logError(error, `Failed to open recent item: ${uri}`);
-          }
-          this._parentMenu.close(true);
-          this._closeAndDestroyRecentMenu();
-        });
+      const filesHeader = this._createSectionHeader(this._gettext('Documents'));
+      menu.addMenuItem(filesHeader);
+
+      files.forEach(({ title: itemTitle, uri, isDirectory }) => {
+        const icon = this._getRecentFileIcon(uri, isDirectory);
+        const recentMenuItem = this._createMenuItemWithIcon(
+          itemTitle,
+          icon,
+          isDirectory ? 'folder-symbolic' : 'text-x-generic-symbolic'
+        );
+        recentMenuItem.connect('activate', () => this._launchRecentUri(uri));
+        this._attachDocumentTooltip(recentMenuItem, uri);
         menu.addMenuItem(recentMenuItem);
       });
 
@@ -248,8 +246,24 @@ export const RecentItemsSubmenu = GObject.registerClass(
       logError(error, 'Failed to clear recent items list');
     }
 
+    if (CLEAR_APPLICATION_MENU) {
+      this._clearApplicationUsage();
+    }
+
     if (this._recentMenu) {
       this._populateMenu(this._recentMenu);
+    }
+  }
+
+  _clearApplicationUsage() {
+    const file = Gio.File.new_for_path(APPLICATION_STATE_FILE);
+
+    try {
+      if (file.query_exists(null)) {
+        file.delete(null);
+      }
+    } catch (error) {
+      logError(error, 'Failed to clear recent applications list');
     }
   }
 
@@ -674,6 +688,287 @@ export const RecentItemsSubmenu = GObject.registerClass(
     } finally {
       this._recentMenuClosing = false;
     }
+  }
+
+  _createMenuItemWithIcon(labelText, gicon, fallbackIconName) {
+    const menuItem = new PopupMenu.PopupMenuItem('');
+
+    const iconProps = {
+      style_class: 'popup-menu-icon',
+      y_align: Clutter.ActorAlign.CENTER,
+    };
+
+    if (gicon) {
+      iconProps.gicon = gicon;
+    } else if (fallbackIconName) {
+      iconProps.icon_name = fallbackIconName;
+    }
+
+    const icon = new St.Icon(iconProps);
+    menuItem.insert_child_at_index(icon, 0);
+
+    if (menuItem.label) {
+      menuItem.label.text = labelText;
+      menuItem.label.x_expand = true;
+      menuItem.label.y_align = Clutter.ActorAlign.CENTER;
+    } else {
+      const label = new St.Label({
+        text: labelText,
+        x_expand: true,
+        y_align: Clutter.ActorAlign.CENTER,
+      });
+      menuItem.add_child(label);
+    }
+
+    return menuItem;
+  }
+
+  _attachDocumentTooltip(menuItem, uri) {
+    const actor = menuItem?.actor ?? null;
+    const tooltipText = this._formatDocumentTooltip(uri);
+
+    if (!actor || !tooltipText) {
+      return;
+    }
+
+    const tooltip = new DocumentTooltip(actor, tooltipText);
+
+    menuItem.connect('destroy', () => {
+      tooltip.destroy();
+    });
+
+    menuItem.connect('activate', () => {
+      tooltip.close();
+    });
+  }
+
+  _formatDocumentTooltip(uri) {
+    if (!uri || typeof uri !== 'string') {
+      return null;
+    }
+
+    if (uri.startsWith('file://')) {
+      const path = uri.substring('file://'.length);
+      return GLib.uri_unescape_string(path, null) ?? path;
+    }
+
+    return GLib.uri_unescape_string(uri, null) ?? uri;
+  }
+
+  _getRecentFileIcon(uri, isDirectory) {
+    if (!uri || typeof uri !== 'string') {
+      return null;
+    }
+
+    if (!uri.startsWith('file://')) {
+      return null;
+    }
+
+    try {
+      const file = Gio.File.new_for_uri(uri);
+      if (!file.query_exists(null)) {
+        return null;
+      }
+
+      const info = file.query_info('standard::icon,standard::type', Gio.FileQueryInfoFlags.NONE, null);
+      if (info) {
+        return info.get_icon?.() ?? null;
+      }
+    } catch (_error) {
+      // Swallow errors; fall back to themed icon based on item type.
+    }
+
+    if (isDirectory) {
+      return new Gio.ThemedIcon({ names: ['folder-symbolic'] });
+    }
+
+    return null;
+  }
+
+  _launchRecentUri(uri) {
+    if (!uri) {
+      return;
+    }
+
+    try {
+      const context = global.create_app_launch_context(0, -1);
+      Gio.AppInfo.launch_default_for_uri(uri, context);
+    } catch (error) {
+      const displayName = this._formatDocumentTooltip(uri) ?? uri;
+      this._notifyLaunchFailure(
+        this._gettext('Item unavailable'),
+        this._gettext('Could not open "%s".').format(displayName)
+      );
+      logError(error, `Failed to open recent item: ${uri}`);
+    } finally {
+      this._parentMenu.close(true);
+      this._closeAndDestroyRecentMenu();
+    }
+  }
+
+  _launchRecentApplication(appInfo, desktopId) {
+    if (!appInfo) {
+      this._parentMenu.close(true);
+      this._closeAndDestroyRecentMenu();
+      return;
+    }
+
+    try {
+      const context = global.create_app_launch_context(0, -1);
+      if (typeof appInfo.launch === 'function') {
+        appInfo.launch([], context);
+      }
+    } catch (error) {
+      const fallbackId =
+        (typeof appInfo.get_id === 'function' && appInfo.get_id()) ||
+        (typeof appInfo.get_name === 'function' && appInfo.get_name()) ||
+        desktopId ||
+        'unknown';
+      this._notifyLaunchFailure(
+        this._gettext('Application unavailable'),
+        this._gettext('Could not launch "%s".').format(fallbackId)
+      );
+      logError(error, `Failed to launch application: ${fallbackId}`);
+    } finally {
+      this._parentMenu.close(true);
+      this._closeAndDestroyRecentMenu();
+    }
+  }
+
+  _notifyLaunchFailure(title, message) {
+    try {
+      Main.notifyError(title, message);
+    } catch (error) {
+      logError(error, 'Failed to display Kiwi Menu notification');
+    }
+  }
+
+  _getApplicationState() {
+    const state = new Map();
+    const file = Gio.File.new_for_path(APPLICATION_STATE_FILE);
+
+    if (!file.query_exists(null)) {
+      return state;
+    }
+
+    try {
+      const [, contents] = file.load_contents(null);
+      const text = new TextDecoder().decode(contents);
+      const regex = /<application\b([^>]*)\/>/g;
+      let match;
+
+      while ((match = regex.exec(text)) !== null) {
+        const attributes = match[1] ?? '';
+        const idMatch = /\bid="([^"]+)"/.exec(attributes);
+
+        if (!idMatch) {
+          continue;
+        }
+
+        const id = idMatch[1];
+        const scoreMatch = /\bscore="([^"]+)"/.exec(attributes);
+        const lastSeenMatch = /\blast-seen="([^"]+)"/.exec(attributes);
+        const score = scoreMatch ? Number.parseFloat(scoreMatch[1]) : 0;
+        const lastSeen = lastSeenMatch ? Number.parseInt(lastSeenMatch[1], 10) : 0;
+
+        state.set(id, {
+          score: Number.isFinite(score) ? score : 0,
+          lastSeen: Number.isFinite(lastSeen) ? lastSeen : 0,
+        });
+      }
+    } catch (error) {
+      logError(error, 'Failed to read recent applications state');
+    }
+
+    return state;
+  }
+
+  _getRecentApplications(limit = APPLICATIONS_RECENT_LIMIT) {
+    const applications = [];
+
+    if (!Shell?.AppUsage?.get_default) {
+      return applications;
+    }
+
+    const sortMode = APPLICATION_SORT_MODE === 'recent' ? 'recent' : 'usage';
+    const stateMap = sortMode === 'recent' ? this._getApplicationState() : null;
+
+    try {
+      const usage = Shell.AppUsage.get_default();
+      if (!usage || typeof usage.get_most_used !== 'function') {
+        return applications;
+      }
+
+      const appSystem = Shell.AppSystem?.get_default?.() ?? null;
+      const seen = new Set();
+      const rawCandidates = usage.get_most_used?.();
+      const candidates = [];
+
+      if (Array.isArray(rawCandidates)) {
+        candidates.push(...rawCandidates);
+      } else if (rawCandidates) {
+        for (let node = rawCandidates; node; node = node.next ?? null) {
+          const candidate = node.data ?? node;
+          if (candidate) {
+            candidates.push(candidate);
+          }
+        }
+      }
+
+      for (const app of candidates) {
+        if (sortMode === 'usage' && applications.length >= limit) {
+          break;
+        }
+
+        if (!app || typeof app.get_id !== 'function') {
+          continue;
+        }
+
+        const desktopId = app.get_id();
+        if (!desktopId || seen.has(desktopId)) {
+          continue;
+        }
+
+        seen.add(desktopId);
+
+        const appInfo = app.get_app_info?.() ?? appSystem?.lookup_app?.(desktopId)?.get_app_info?.();
+        if (!appInfo) {
+          continue;
+        }
+
+        const fallbackName =
+          typeof desktopId === 'string' && desktopId.endsWith('.desktop')
+            ? desktopId.slice(0, -'.desktop'.length)
+            : desktopId;
+
+        const title =
+          appInfo.get_display_name?.() ??
+          appInfo.get_name?.() ??
+          app.get_name?.() ??
+          fallbackName;
+
+        const gicon = app.get_gicon?.() ?? appInfo.get_icon?.() ?? null;
+
+        applications.push({
+          title,
+          appInfo,
+          gicon,
+          desktopId,
+        });
+      }
+    } catch (error) {
+      logError(error, 'Failed to resolve recent applications');
+    }
+
+    if (sortMode === 'recent' && applications.length > 1) {
+      applications.sort((a, b) => {
+        const aState = stateMap?.get(a.desktopId);
+        const bState = stateMap?.get(b.desktopId);
+        return (bState?.lastSeen ?? 0) - (aState?.lastSeen ?? 0);
+      });
+    }
+
+    return applications.slice(0, limit);
   }
 
   _getRecentItems() {
