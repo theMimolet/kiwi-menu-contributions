@@ -21,7 +21,7 @@ Kiwi Menu replaces the Activities button with a compact, macOS-inspired launcher
 - **Hide Power buttons**: Hide Lock screen and Power buttons in Quick Settings
 - **Multilingual support**: Fully translatable interface
 
-<p align="center"><img width="599" height="450" alt="Screenshot From 2025-10-24 17-31-09" src="https://github.com/user-attachments/assets/bc2c7893-42a0-4f74-bf98-4764224f9985" /></p>
+<p align="left"><img width="427" height="320" alt="Screenshot From 2025-10-24 17-31-09" src="https://github.com/user-attachments/assets/bc2c7893-42a0-4f74-bf98-4764224f9985" /></p>
 
 
 ## Other extensions
