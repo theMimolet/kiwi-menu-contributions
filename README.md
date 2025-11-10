@@ -10,8 +10,8 @@
 
 Kiwi Menu replaces the Activities button with a compact, macOS-inspired launcher that keeps your most common session actions one click away.
 
+<img width="400" height="420" alt="Screenshot From 2025-11-10 22-38-46" src="https://github.com/user-attachments/assets/2854f51e-7bd1-454b-838a-a39f7cf65dc9" />
 
-<p align="left"><img width="427" height="320" alt="Screenshot From 2025-10-24 17-31-09" src="https://github.com/user-attachments/assets/bc2c7893-42a0-4f74-bf98-4764224f9985" /></p>
 
 ## Features
 
@@ -22,6 +22,8 @@ Kiwi Menu replaces the Activities button with a compact, macOS-inspired launcher
 - **Adaptive logout label**: Personalizes the log out entry with your full name when available.
 - **Hide Activities**: Hide activities button in top panel.
 - **Hide Power buttons**: Hide Lock screen and Power buttons in Quick Settings
+- **Custom AppStore command**: Add your distro specific App store shortcut
+- **Personalized Menu Item**: Add one custom menu entry of your choice
 - **Multilingual support**: Fully translatable interface
 
 ## Other extensions
@@ -31,12 +33,6 @@ Recommended to pair with [Kiwi is not Apple](https://extensions.gnome.org/extens
 ## Known Issues
 
 - Recent Applications menu is cleared after log out. This is limitation of Gnome shell
-
-## Future implementations
-- [x] add translations
-- [x] option to hide default Gnome Power options in QuickSettings
-- [ ] Force quit to rebuild using popup window with a list of killable apps instead of crossair
-- [ ] ...
 
 ## Contributing Translations
 
