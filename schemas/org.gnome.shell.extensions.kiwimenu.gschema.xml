@@ -31,6 +31,21 @@
       <summary>App Store command</summary>
       <description>Command executed when launching the App Store menu item</description>
     </key>
+    <key type="b" name="custom-menu-enabled">
+      <default>false</default>
+      <summary>Enable custom menu item</summary>
+      <description>Enable or disable the custom menu item</description>
+    </key>
+    <key type="s" name="custom-menu-label">
+      <default>''</default>
+      <summary>Custom menu item label</summary>
+      <description>The label text to display for the custom menu item</description>
+    </key>
+    <key type="s" name="custom-menu-command">
+      <default>''</default>
+      <summary>Custom menu item command</summary>
+      <description>Command to execute when the custom menu item is activated</description>
+    </key>
     <key type="i" name="prefs-default-width">
       <default>700</default>
       <summary>Default width for the preferences window</summary>

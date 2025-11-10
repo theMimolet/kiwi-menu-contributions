@@ -13,6 +13,7 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import * as Util from 'resource:///org/gnome/shell/misc/util.js';
 import { openForceQuitOverlay } from './forceQuitOverlay.js';
 import { RecentItemsSubmenu } from './recentItemsSubmenu.js';
+import { createCustomMenuItem } from './customMenuItem.js';
 
 function loadJsonFile(basePath, segments) {
   const textDecoder = new TextDecoder();
@@ -74,6 +75,21 @@ export const KiwiMenu = GObject.registerClass(
       );
       this._settingsSignalIds.push(
         this._settings.connect('changed::app-store-command', () =>
+          this._renderPopupMenu()
+        )
+      );
+      this._settingsSignalIds.push(
+        this._settings.connect('changed::custom-menu-enabled', () =>
+          this._renderPopupMenu()
+        )
+      );
+      this._settingsSignalIds.push(
+        this._settings.connect('changed::custom-menu-label', () =>
+          this._renderPopupMenu()
+        )
+      );
+      this._settingsSignalIds.push(
+        this._settings.connect('changed::custom-menu-command', () =>
           this._renderPopupMenu()
         )
       );
@@ -170,10 +186,21 @@ export const KiwiMenu = GObject.registerClass(
       this.menu.removeAll();
 
       const layout = await this._generateLayout();
+      let customMenuAdded = false;
+
       layout.forEach((item) => {
         switch (item.type) {
           case 'menu':
             this._makeMenu(item.title, item.cmds);
+            
+            // Add custom menu item right after App Store entry
+            if (!customMenuAdded && item.commandSettingKey === 'app-store-command') {
+              const customItem = createCustomMenuItem(this._settings, this._gettext.bind(this));
+              if (customItem) {
+                this.menu.addMenuItem(customItem);
+              }
+              customMenuAdded = true;
+            }
             break;
           case 'recent-items':
             this._makeRecentItemsMenu(item.title);

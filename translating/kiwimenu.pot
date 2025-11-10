@@ -110,6 +110,22 @@ msgid "Command launched when opening the App Store menu item."
 msgstr ""
 
 #: prefs.js
+msgid "Custom Menu Item"
+msgstr ""
+
+#: prefs.js
+msgid "Add a custom menu entry with your own label and command."
+msgstr ""
+
+#: prefs.js
+msgid "Menu Label"
+msgstr ""
+
+#: prefs.js
+msgid "Command"
+msgstr ""
+
+#: prefs.js
 msgid "Restore Default"
 msgstr ""
 
