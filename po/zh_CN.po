@@ -104,7 +104,23 @@ msgstr "App Store 启动命令"
 
 #: prefs.js
 msgid "Command launched when opening the App Store menu item."
-msgstr "打开 App Store 菜单项时启动的命令。"
+msgstr "打开应用商店菜单项时启动的命令。"
+
+#: prefs.js
+msgid "Custom Menu Item"
+msgstr "自定义菜单项"
+
+#: prefs.js
+msgid "Add a custom menu entry with your own label and command."
+msgstr "添加带有自定义标签和命令的菜单项。"
+
+#: prefs.js
+msgid "Menu Label"
+msgstr "菜单标签"
+
+#: prefs.js
+msgid "Command"
+msgstr "命令"
 
 #: prefs.js
 msgid "Restore Default"

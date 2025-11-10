@@ -102,11 +102,27 @@ msgstr "Programų parduotuvės komanda"
 
 #: prefs.js
 msgid "Command launched when opening the App Store menu item."
-msgstr "Komanda, paleidžiama atidarius programų parduotuvės meniu elementą."
+msgstr "Komanda paleidžiama atidarant programų parduotuvės meniu elementą."
+
+#: prefs.js
+msgid "Custom Menu Item"
+msgstr "Pasirinktinis meniu elementas"
+
+#: prefs.js
+msgid "Add a custom menu entry with your own label and command."
+msgstr "Pridėkite pasirinktinį meniu įrašą su savo etikete ir komanda."
+
+#: prefs.js
+msgid "Menu Label"
+msgstr "Meniu etiketė"
+
+#: prefs.js
+msgid "Command"
+msgstr "Komanda"
 
 #: prefs.js
 msgid "Restore Default"
-msgstr "Atkurti numatytąją"
+msgstr "Atkurti numatytąjį"
 
 #: prefs.js
 msgid "Menu Icon"

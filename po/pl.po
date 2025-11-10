@@ -102,7 +102,23 @@ msgstr "Polecenie sklepu z aplikacjami"
 
 #: prefs.js
 msgid "Command launched when opening the App Store menu item."
-msgstr "Polecenie uruchamiane podczas otwierania elementu menu sklepu z aplikacjami."
+msgstr "Polecenie uruchamiane przy otwieraniu elementu menu App Store."
+
+#: prefs.js
+msgid "Custom Menu Item"
+msgstr "Niestandardowy element menu"
+
+#: prefs.js
+msgid "Add a custom menu entry with your own label and command."
+msgstr "Dodaj niestandardowy wpis menu z własną etykietą i poleceniem."
+
+#: prefs.js
+msgid "Menu Label"
+msgstr "Etykieta menu"
+
+#: prefs.js
+msgid "Command"
+msgstr "Polecenie"
 
 #: prefs.js
 msgid "Restore Default"

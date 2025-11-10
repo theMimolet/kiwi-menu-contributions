@@ -102,7 +102,23 @@ msgstr "App Store-opdracht"
 
 #: prefs.js
 msgid "Command launched when opening the App Store menu item."
-msgstr "Opdracht die wordt gestart bij het openen van het App Store-menu-item."
+msgstr "Opdracht uitgevoerd bij het openen van het App Store-menu-item."
+
+#: prefs.js
+msgid "Custom Menu Item"
+msgstr "Aangepast menu-item"
+
+#: prefs.js
+msgid "Add a custom menu entry with your own label and command."
+msgstr "Voeg een aangepast menu-item toe met uw eigen label en opdracht."
+
+#: prefs.js
+msgid "Menu Label"
+msgstr "Menulabel"
+
+#: prefs.js
+msgid "Command"
+msgstr "Opdracht"
 
 #: prefs.js
 msgid "Restore Default"

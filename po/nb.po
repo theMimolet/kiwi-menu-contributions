@@ -102,7 +102,23 @@ msgstr "App Store-kommando"
 
 #: prefs.js
 msgid "Command launched when opening the App Store menu item."
-msgstr "Kommando som kjøres når App Store-menyelementet åpnes."
+msgstr "Kommando som startes når App Store-menyelementet åpnes."
+
+#: prefs.js
+msgid "Custom Menu Item"
+msgstr "Tilpasset menyelement"
+
+#: prefs.js
+msgid "Add a custom menu entry with your own label and command."
+msgstr "Legg til et tilpasset menyinnslag med din egen etikett og kommando."
+
+#: prefs.js
+msgid "Menu Label"
+msgstr "Menyetikett"
+
+#: prefs.js
+msgid "Command"
+msgstr "Kommando"
 
 #: prefs.js
 msgid "Restore Default"
