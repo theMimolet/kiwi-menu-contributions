@@ -102,11 +102,27 @@ msgstr "Comando da loja de aplicações"
 
 #: prefs.js
 msgid "Command launched when opening the App Store menu item."
-msgstr "Comando executado ao abrir o item de menu da loja de aplicações."
+msgstr "Comando executado ao abrir o item de menu da App Store."
+
+#: prefs.js
+msgid "Custom Menu Item"
+msgstr "Item de menu personalizado"
+
+#: prefs.js
+msgid "Add a custom menu entry with your own label and command."
+msgstr "Adicione uma entrada de menu personalizada com seu próprio rótulo e comando."
+
+#: prefs.js
+msgid "Menu Label"
+msgstr "Rótulo do menu"
+
+#: prefs.js
+msgid "Command"
+msgstr "Comando"
 
 #: prefs.js
 msgid "Restore Default"
-msgstr "Restaurar predefinição"
+msgstr "Restaurar padrão"
 
 #: prefs.js
 msgid "Menu Icon"

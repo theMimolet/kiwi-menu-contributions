@@ -104,11 +104,27 @@ msgstr "App Store 실행 명령"
 
 #: prefs.js
 msgid "Command launched when opening the App Store menu item."
-msgstr "앱 스토어 메뉴 항목을 클릭할 시 실행할 명령을 지정합니다."
+msgstr "앱 스토어 메뉴 항목을 열 때 실행되는 명령입니다."
+
+#: prefs.js
+msgid "Custom Menu Item"
+msgstr "사용자 정의 메뉴 항목"
+
+#: prefs.js
+msgid "Add a custom menu entry with your own label and command."
+msgstr "고유한 레이블과 명령으로 사용자 정의 메뉴 항목을 추가합니다."
+
+#: prefs.js
+msgid "Menu Label"
+msgstr "메뉴 레이블"
+
+#: prefs.js
+msgid "Command"
+msgstr "명령"
 
 #: prefs.js
 msgid "Restore Default"
-msgstr "기본값으로 복원"
+msgstr "기본값 복원"
 
 #: prefs.js
 msgid "Menu Icon"

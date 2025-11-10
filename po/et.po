@@ -102,11 +102,27 @@ msgstr "Rakenduste poe käsk"
 
 #: prefs.js
 msgid "Command launched when opening the App Store menu item."
-msgstr "Käsk, mis käivitatakse rakenduste poe menüüelemendi avamisel."
+msgstr "Rakenduste poe menüü-elemendi avamisel käivitatav käsk."
+
+#: prefs.js
+msgid "Custom Menu Item"
+msgstr "Kohandatud menüüelement"
+
+#: prefs.js
+msgid "Add a custom menu entry with your own label and command."
+msgstr "Lisa kohandatud menüükanne oma sildi ja käsuga."
+
+#: prefs.js
+msgid "Menu Label"
+msgstr "Menüü silt"
+
+#: prefs.js
+msgid "Command"
+msgstr "Käsk"
 
 #: prefs.js
 msgid "Restore Default"
-msgstr "Taasta vaikimisi"
+msgstr "Taasta vaikeväärtus"
 
 #: prefs.js
 msgid "Menu Icon"
