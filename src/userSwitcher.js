@@ -6,6 +6,7 @@
 import AccountsService from 'gi://AccountsService';
 import Clutter from 'gi://Clutter';
 import Gdm from 'gi://Gdm';
+import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import St from 'gi://St';
@@ -22,7 +23,7 @@ const MINIMUM_VISIBLE_UID = 1000;
 export const UserSwitcherButton = GObject.registerClass(
   class UserSwitcherButton extends PanelMenu.Button {
     _init(extension) {
-      super._init(0.0, 'KiwiUserSwitcher');
+      super._init(1.0, 'KiwiUserSwitcher');
 
       this._extension = extension;
       this._menuSignals = [];
@@ -37,6 +38,11 @@ export const UserSwitcherButton = GObject.registerClass(
 
       if (this.menu?.actor) {
         this.menu.actor.add_style_class_name('kiwi-user-switcher-menu');
+        this.menu.actor.set_x_align(Clutter.ActorAlign.END);
+        this.menu.actor.set_x_expand(false);
+        if (typeof this.menu.setSourceAlignment === 'function') {
+          this.menu.setSourceAlignment(1);
+        }
       }
 
       this._menuOpenSignalId = this.menu?.connect('open-state-changed', (_, open) => {
@@ -128,29 +134,37 @@ export const UserSwitcherButton = GObject.registerClass(
         placeholder.actor.add_style_class_name('kiwi-user-switcher-empty');
         this.menu.addMenuItem(placeholder);
       } else {
-        const gridItem = new PopupMenu.PopupBaseMenuItem({
-          reactive: false,
-          can_focus: false,
-          style_class: 'kiwi-user-grid-container',
-        });
-
-        const gridLayout = new St.BoxLayout({
+        const gridSection = new PopupMenu.PopupMenuSection();
+        
+        const gridContainer = new St.BoxLayout({
+          vertical: true,
           style_class: 'kiwi-user-grid',
-          x_align: Clutter.ActorAlign.CENTER,
-          y_align: Clutter.ActorAlign.CENTER,
+          x_expand: true,
         });
 
-        users.forEach((user) => {
-          gridLayout.add_child(this._createUserWidget(user, currentUserName));
+        let currentRow = null;
+        users.forEach((user, index) => {
+          if (index % 3 === 0) {
+            currentRow = new St.BoxLayout({
+              vertical: false,
+              x_expand: true,
+            });
+            gridContainer.add_child(currentRow);
+          }
+
+          const userWidget = this._createUserWidget(user, currentUserName);
+          userWidget.set_x_expand(true);
+          currentRow.add_child(userWidget);
         });
 
-        gridItem.actor.add_child(gridLayout);
-        this.menu.addMenuItem(gridItem);
+        gridSection.actor.add_child(gridContainer);
+        this.menu.addMenuItem(gridSection);
       }
 
       this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
       this._addActionItem(this._gettext('Login Window...'), () => this._gotoLoginWindow());
+      this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
       this._addActionItem(
         this._gettext('Users & Groups Settings...'),
         () => this._openUserSettings()
@@ -223,6 +237,11 @@ export const UserSwitcherButton = GObject.registerClass(
         x_expand: true,
         y_expand: true,
       });
+      button.set_x_align(Clutter.ActorAlign.FILL);
+
+      if (isCurrent) {
+        button.add_style_class_name('current-user');
+      }
 
       const content = new St.BoxLayout({
         vertical: true,
@@ -275,32 +294,85 @@ export const UserSwitcherButton = GObject.registerClass(
       }
 
       this.menu.close(true);
-      this._handoffToLoginScreen();
+
+      const username = user.get_user_name?.();
+      if (!username) {
+        return;
+      }
+
+      // If clicking on current user, just close the menu - nothing to switch to
+      const currentUserName = GLib.get_user_name();
+      if (username === currentUserName) {
+        return;
+      }
+
+      // Try to find and activate user's session
+      // Don't rely on is_logged_in_anywhere() as it can be stale
+      const activated = this._activateUserSession(username);
+      
+      if (!activated) {
+        // No session found, go to GDM login screen
+        this._gotoLoginWindow();
+      }
     }
 
-    _handoffToLoginScreen() {
+    _activateUserSession(username) {
+      // Get the session ID for this user using loginctl
+      try {
+        const proc = Gio.Subprocess.new(
+          ['loginctl', 'list-sessions', '--no-legend', '--no-pager'],
+          Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE
+        );
+
+        const [, stdout] = proc.communicate_utf8(null, null);
+        if (!stdout) {
+          return false;
+        }
+
+        // Parse loginctl output to find user's graphical session
+        // Format: SESSION UID USER SEAT LEADER CLASS TTY IDLE SINCE
+        const lines = stdout.trim().split('\n');
+        let sessionId = null;
+
+        for (const line of lines) {
+          const parts = line.trim().split(/\s+/);
+          if (parts.length >= 6) {
+            const [sid, , user, seat, , sessionClass] = parts;
+            // Match username and look for graphical session (user class on a seat)
+            if (user === username && seat && seat !== '-' && sessionClass === 'user') {
+              sessionId = sid;
+              break;
+            }
+          }
+        }
+
+        if (sessionId) {
+          Util.spawn(['loginctl', 'activate', sessionId]);
+          return true;
+        }
+        
+        return false;
+      } catch (error) {
+        logError(error, 'Failed to activate user session');
+        return false;
+      }
+    }
+
+    _gotoLoginWindow() {
+      // Lock the screen first if screen shield is available
       if (Main.screenShield) {
         Main.screenShield.lock(false);
       }
 
+      // Use repaint func to ensure lock animation completes before switching to GDM
       Clutter.threads_add_repaint_func(Clutter.RepaintFlags.POST_PAINT, () => {
         try {
           Gdm.goto_login_session_sync(null);
         } catch (error) {
-          logError(error, 'Failed to open login screen via GDM');
-          this._fallbackLoginHandoff();
+          logError(error, 'Failed to switch to GDM login session');
         }
-
         return false;
       });
-    }
-
-    _fallbackLoginHandoff() {
-      try {
-        this._userManager?.goto_login_session?.();
-      } catch (error) {
-        logError(error, 'Fallback login handoff failed');
-      }
     }
 
     _openUserSettings() {

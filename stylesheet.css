@@ -47,6 +47,9 @@
   text-shadow: none;
 }
 
+
+/* User Switcher Styles */
+
 .kiwi-user-switcher-button {
   margin-left: 6px;
   margin-right: 6px;
@@ -54,29 +57,33 @@
 }
 
 .kiwi-user-switcher-menu {
-  min-width: 280px;
+  min-width: 400px;
   padding: 6px 0;
 }
 
 .kiwi-user-grid-container {
-  padding: 12px;
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-top: 12px;
 }
 
 .kiwi-user-grid {
-  spacing: 24px;
+  min-width: 100%;
+  margin: 0 auto;
 }
 
 .kiwi-user-item {
   border-radius: 12px;
   padding: 12px;
+  margin: 0 12px 0 12px;
 }
 
 .kiwi-user-item:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(128, 128, 128, 0.15);
 }
 
 .kiwi-user-item-content {
-  spacing: 8px;
+  align-items: center;
 }
 
 .kiwi-user-card-avatar-frame {
@@ -84,7 +91,7 @@
   height: 64px;
   border-radius: 32px;
   overflow: hidden;
-  border: 2px solid transparent;
+  /*border: 2px solid transparent;*/
 }
 
 .kiwi-user-card-avatar-frame.logged-in {
@@ -101,6 +108,7 @@
   font-weight: bold;
   font-size: 1.1em;
   text-align: center;
+  margin-top: 8px;
 }
 
 .kiwi-user-switcher-empty {
