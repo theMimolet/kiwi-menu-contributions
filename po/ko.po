@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kiwi Menu 1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/kem-a/kiwimenu-kemma/issues\n"
-"POT-Creation-Date: 2025-11-10 14:28+0900\n"
+"POT-Creation-Date: 2025-11-03 00:00+0000\n"
 "PO-Revision-Date: 2025-11-10 14:28+0900\n"
 "Last-Translator: \n"
 "Language-Team: Korean\n"
@@ -86,6 +86,18 @@ msgstr "앱"
 msgid "Clear Menu"
 msgstr "메뉴 지우기"
 
+#: src/userSwitcher.js
+msgid "No eligible user accounts found"
+msgstr "적합한 사용자 계정을 찾을 수 없습니다"
+
+#: src/userSwitcher.js
+msgid "Login Window..."
+msgstr "로그인 창..."
+
+#: src/userSwitcher.js
+msgid "Users & Groups Settings..."
+msgstr "사용자 및 그룹 설정..."
+
 #: prefs.js
 msgid "Options"
 msgstr "옵션"
@@ -97,6 +109,10 @@ msgstr "메뉴"
 #: prefs.js
 msgid "Adjust how the Kiwi Menu looks and behaves."
 msgstr "Kiwi 메뉴의 동작과 모습을 조정합니다."
+
+#: prefs.js
+msgid "Menu Icon"
+msgstr "메뉴 아이콘"
 
 #: prefs.js
 msgid "App Store Command"
@@ -125,10 +141,6 @@ msgstr "명령"
 #: prefs.js
 msgid "Restore Default"
 msgstr "기본값 복원"
-
-#: prefs.js
-msgid "Menu Icon"
-msgstr "메뉴 아이콘"
 
 #: prefs.js
 msgid "Choose the icon to display in the panel."
@@ -219,5 +231,7 @@ msgid "Copyright"
 msgstr ""
 
 #: prefs.js
-msgid "Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General Public License version 3 or later."
+msgid ""
+"Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General "
+"Public License version 3 or later."
 msgstr ""

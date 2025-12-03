@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kiwimenu\n"
 "Report-Msgid-Bugs-To: https://github.com/kem-a/kiwimenu-kemma/issues\n"
-"POT-Creation-Date: 2025-10-27 00:00+0000\n"
+"POT-Creation-Date: 2025-11-03 00:00+0000\n"
 "PO-Revision-Date: 2025-10-27 12:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: Estonian\n"
@@ -84,6 +84,18 @@ msgstr "Rakendused"
 msgid "Clear Menu"
 msgstr "Tühjenda menüü"
 
+#: src/userSwitcher.js
+msgid "No eligible user accounts found"
+msgstr "Sobivaid kasutajakontosid ei leitud"
+
+#: src/userSwitcher.js
+msgid "Login Window..."
+msgstr "Sisselogimise aken..."
+
+#: src/userSwitcher.js
+msgid "Users & Groups Settings..."
+msgstr "Kasutajate ja gruppide seaded..."
+
 #: prefs.js
 msgid "Options"
 msgstr "Valikud"
@@ -95,6 +107,10 @@ msgstr "Menüü"
 #: prefs.js
 msgid "Adjust how the Kiwi Menu looks and behaves."
 msgstr "Kohanda Kiwi menüü välimust ja käitumist."
+
+#: prefs.js
+msgid "Menu Icon"
+msgstr "Menüü ikoon"
 
 #: prefs.js
 msgid "App Store Command"
@@ -123,10 +139,6 @@ msgstr "Käsk"
 #: prefs.js
 msgid "Restore Default"
 msgstr "Taasta vaikeväärtus"
-
-#: prefs.js
-msgid "Menu Icon"
-msgstr "Menüü ikoon"
 
 #: prefs.js
 msgid "Choose the icon to display in the panel."

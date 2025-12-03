@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kiwi Menu 1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/kem-a/kiwimenu-kemma/issues\n"
-"POT-Creation-Date: 2025-10-27 00:00+0000\n"
+"POT-Creation-Date: 2025-11-03 00:00+0000\n"
 "PO-Revision-Date: 2025-11-02 10:45+0800\n"
 "Last-Translator: Markson Hosben <marksonhosben@proton.me>\n"
 "Language-Team: Chinese\n"
@@ -86,6 +86,18 @@ msgstr "应用程序"
 msgid "Clear Menu"
 msgstr "清除菜单"
 
+#: src/userSwitcher.js
+msgid "No eligible user accounts found"
+msgstr "未找到符合条件的用户账户"
+
+#: src/userSwitcher.js
+msgid "Login Window..."
+msgstr "登录窗口..."
+
+#: src/userSwitcher.js
+msgid "Users & Groups Settings..."
+msgstr "用户和组设置..."
+
 #: prefs.js
 msgid "Options"
 msgstr "选项"
@@ -97,6 +109,10 @@ msgstr "菜单"
 #: prefs.js
 msgid "Adjust how the Kiwi Menu looks and behaves."
 msgstr "调整 Kiwi 菜单的外观与行为。"
+
+#: prefs.js
+msgid "Menu Icon"
+msgstr "菜单图标"
 
 #: prefs.js
 msgid "App Store Command"
@@ -125,10 +141,6 @@ msgstr "命令"
 #: prefs.js
 msgid "Restore Default"
 msgstr "恢复默认"
-
-#: prefs.js
-msgid "Menu Icon"
-msgstr "菜单图标"
 
 #: prefs.js
 msgid "Choose the icon to display in the panel."
@@ -219,6 +231,9 @@ msgid "Copyright"
 msgstr "版权"
 
 #: prefs.js
-msgid "Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General Public License version 3 or later."
-msgstr "版权所有 © 2025 Arnis Kemlers。依据 GNU 通用公共许可证第 3 版或更高版本的条款授权。"
-
+msgid ""
+"Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General "
+"Public License version 3 or later."
+msgstr ""
+"版权所有 © 2025 Arnis Kemlers。依据 GNU 通用公共许可证第 3 版或更高版本的条款"
+"授权。"

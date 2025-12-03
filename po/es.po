@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kiwimenu\n"
 "Report-Msgid-Bugs-To: https://github.com/kem-a/kiwimenu-kemma/issues\n"
-"POT-Creation-Date: 2025-10-27 00:00+0000\n"
+"POT-Creation-Date: 2025-11-03 00:00+0000\n"
 "PO-Revision-Date: 2025-10-27 12:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: Spanish\n"
@@ -84,6 +84,18 @@ msgstr "Aplicaciones"
 msgid "Clear Menu"
 msgstr "Limpiar menú"
 
+#: src/userSwitcher.js
+msgid "No eligible user accounts found"
+msgstr "No se encontraron cuentas de usuario elegibles"
+
+#: src/userSwitcher.js
+msgid "Login Window..."
+msgstr "Ventana de inicio de sesión..."
+
+#: src/userSwitcher.js
+msgid "Users & Groups Settings..."
+msgstr "Configuración de usuarios y grupos..."
+
 #: prefs.js
 msgid "Options"
 msgstr "Opciones"
@@ -95,6 +107,10 @@ msgstr "Menú"
 #: prefs.js
 msgid "Adjust how the Kiwi Menu looks and behaves."
 msgstr "Ajusta cómo se ve y se comporta el menú Kiwi."
+
+#: prefs.js
+msgid "Menu Icon"
+msgstr "Icono del menú"
 
 #: prefs.js
 msgid "App Store Command"
@@ -110,7 +126,8 @@ msgstr "Elemento de menú personalizado"
 
 #: prefs.js
 msgid "Add a custom menu entry with your own label and command."
-msgstr "Añade una entrada de menú personalizada con tu propia etiqueta y comando."
+msgstr ""
+"Añade una entrada de menú personalizada con tu propia etiqueta y comando."
 
 #: prefs.js
 msgid "Menu Label"
@@ -123,10 +140,6 @@ msgstr "Comando"
 #: prefs.js
 msgid "Restore Default"
 msgstr "Restaurar predeterminado"
-
-#: prefs.js
-msgid "Menu Icon"
-msgstr "Icono del menú"
 
 #: prefs.js
 msgid "Choose the icon to display in the panel."

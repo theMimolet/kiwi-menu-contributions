@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kiwimenu\n"
 "Report-Msgid-Bugs-To: https://github.com/kem-a/kiwimenu-kemma/issues\n"
-"POT-Creation-Date: 2025-10-27 00:00+0000\n"
+"POT-Creation-Date: 2025-11-03 00:00+0000\n"
 "PO-Revision-Date: 2025-10-27 12:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: Latvian\n"
@@ -84,6 +84,18 @@ msgstr "Lietotnes"
 msgid "Clear Menu"
 msgstr "Notīrīt izvēlni"
 
+#: src/userSwitcher.js
+msgid "No eligible user accounts found"
+msgstr "Nav atrasti piemēroti lietotāju konti"
+
+#: src/userSwitcher.js
+msgid "Login Window..."
+msgstr "Pieteikšanās logs..."
+
+#: src/userSwitcher.js
+msgid "Users & Groups Settings..."
+msgstr "Lietotāju un grupu iestatījumi..."
+
 #: prefs.js
 msgid "Options"
 msgstr "Opcijas"
@@ -95,6 +107,10 @@ msgstr "Izvēlne"
 #: prefs.js
 msgid "Adjust how the Kiwi Menu looks and behaves."
 msgstr "Pielāgojiet Kiwi izvēlnes izskatu un uzvedību."
+
+#: prefs.js
+msgid "Menu Icon"
+msgstr "Izvēlnes ikona"
 
 #: prefs.js
 msgid "App Store Command"
@@ -123,10 +139,6 @@ msgstr "Komanda"
 #: prefs.js
 msgid "Restore Default"
 msgstr "Atjaunot noklusējumu"
-
-#: prefs.js
-msgid "Menu Icon"
-msgstr "Izvēlnes ikona"
 
 #: prefs.js
 msgid "Choose the icon to display in the panel."

@@ -85,6 +85,18 @@ msgstr ""
 msgid "Clear Menu"
 msgstr ""
 
+#: src/userSwitcher.js
+msgid "No eligible user accounts found"
+msgstr ""
+
+#: src/userSwitcher.js
+msgid "Login Window..."
+msgstr ""
+
+#: src/userSwitcher.js
+msgid "Users & Groups Settings..."
+msgstr ""
+
 #: prefs.js
 msgid "Options"
 msgstr ""

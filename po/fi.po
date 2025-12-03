@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kiwimenu\n"
 "Report-Msgid-Bugs-To: https://github.com/kem-a/kiwimenu-kemma/issues\n"
-"POT-Creation-Date: 2025-10-27 00:00+0000\n"
+"POT-Creation-Date: 2025-11-03 00:00+0000\n"
 "PO-Revision-Date: 2025-10-27 12:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: Finnish\n"
@@ -84,6 +84,18 @@ msgstr "Sovellukset"
 msgid "Clear Menu"
 msgstr "Tyhjennä valikko"
 
+#: src/userSwitcher.js
+msgid "No eligible user accounts found"
+msgstr "Sopivia käyttäjätilejä ei löytynyt"
+
+#: src/userSwitcher.js
+msgid "Login Window..."
+msgstr "Kirjautumisikkuna..."
+
+#: src/userSwitcher.js
+msgid "Users & Groups Settings..."
+msgstr "Käyttäjien ja ryhmien asetukset..."
+
 #: prefs.js
 msgid "Options"
 msgstr "Asetukset"
@@ -95,6 +107,10 @@ msgstr "Valikko"
 #: prefs.js
 msgid "Adjust how the Kiwi Menu looks and behaves."
 msgstr "Mukauta Kiwi-valikon ulkonäköä ja toimintaa."
+
+#: prefs.js
+msgid "Menu Icon"
+msgstr "Valikon kuvake"
 
 #: prefs.js
 msgid "App Store Command"
@@ -123,10 +139,6 @@ msgstr "Komento"
 #: prefs.js
 msgid "Restore Default"
 msgstr "Palauta oletus"
-
-#: prefs.js
-msgid "Menu Icon"
-msgstr "Valikon kuvake"
 
 #: prefs.js
 msgid "Choose the icon to display in the panel."
