@@ -10,21 +10,21 @@
 
 Kiwi Menu replaces the Activities button with a compact, macOS-inspired launcher that keeps your most common session actions one click away.
 
-
-<img width="401" height="420" alt="Screenshot From 2025-11-10 23-01-25" src="https://github.com/user-attachments/assets/0c32eda3-ed19-4e53-bc37-0e91d82a6d62" />
-
+<img width="2083" height="1407" alt="kiwi-menu2" src="https://github.com/user-attachments/assets/951e4994-ba33-4b54-9354-658bda2f6df1" />
 
 ## Features
 
-- **macOS-style panel button**: Swaps the Activities label for a tidy icon-only trigger that blends into GNOME Shell.
-- **Curated session controls**: Sleep, restart, shut down, lock, and log out entries mirror the macOS Apple menu workflow.
+- **macOS style panel button**: Swaps the Activities label for a tidy icon-only trigger that blends into GNOME Shell.
+- **macOS style user switcher**: Adds button to the panel with popup menu to switch between user sessions.
 - **Recent items submenu**: Hover or click to browse recent files and folders with automatic section headers and quick launch support.
 - **Force Quit overlay**: Launches the built-in xkill helper from the menu when an app misbehaves. Optionaly, can also close all apps in current workspace.
-- **Adaptive logout label**: Personalizes the log out entry with your full name when available.
-- **Hide Activities**: Hide activities button in top panel.
-- **Hide Power buttons**: Hide Lock screen and Power buttons in Quick Settings
 - **Custom AppStore command**: Add your distro specific App store shortcut
 - **Personalized Menu Item**: Add one custom menu entry of your choice
+- **Adaptive logout label**: Personalizes the log out entry with your full name when available.
+- **Curated session controls**: Sleep, restart, shut down, lock, and log out entries mirror the macOS Apple menu workflow.
+- **Hide Activities**: Hide activities button in top panel.
+- **Hide Power buttons**: Hide Lock screen and Power buttons in Quick Settings
+
 - **Multilingual support**: Fully translatable interface
 
 ## Other extensions
