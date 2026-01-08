@@ -68,5 +68,10 @@
     "idx": 13,
     "title": "Shutdown",
     "path": "/icons/shutdown-icon-symbolic.svg"
+  },
+  {
+    "idx": 14,
+    "title": "Nobara",
+    "path": "/icons/nobara-icon-symbolic.svg"
   }
 ]
